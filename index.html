@@ -1,0 +1,88 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>OSCFukuoka</title>
+  <style type="text/css">
+input.button {
+  width: 150px;
+  height: 50px;
+  font-size: 1.8em;
+}
+img.led {
+  width: 100px;
+  height: 100px;
+}
+</style>
+</head>
+<body>
+  <p><img id="led_img" src="images/led-off.png" class="led"></p>
+  <p>
+    <input type="button" value="on" onClick="led_on()" class="button"/>
+    <input type="button" value="off" onClick="led_off()" class="button"/>
+  </p>
+  <p id="festum">あなたはそこにいますか？</p>
+  <div id="msg"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+
+    function led_on() {
+      console.log('led_on');
+      socketio.emit('event', { onoff: 'on'});
+    }
+
+    function led_off() {
+      console.log('led_off');
+      socketio.emit('event', { onoff: 'off'});
+    }
+
+    // var socketio = io.connect('http://localhost:8080');
+    var socketio = io.connect('http://192.168.128.103:8080');
+
+    socketio.on("publish", function (data) {
+      addMessage(data.value);
+    });
+
+    socketio.on("areyouthere", function(data){
+      var festum = document.getElementById("festum");
+      if (data.value == 'on') {
+        festum.innerHTML = "ここにいる！";
+      }
+      if (data.value == 'off') {
+        festum.innerHTML = "あなたはそこにいますか？";
+      }
+    });
+
+    socketio.on('connect', function() {
+      console.log('connect');
+
+      var img = document.getElementById("led_img");
+      img.src = "images/led-off.png";
+
+      socketio.on('event', function(data) {
+        console.log('data: ' + data.onoff);
+        if (data.onoff == 'on') {
+          img.src = "/images/led-on.png";
+        }
+        if (data.onoff == 'off') {
+          img.src = "/images/led-off.png";
+        }
+      });
+    });
+
+    function start(name) {
+      socketio.emit("connected", name);
+    }
+
+    function addMessage (msg) {
+      var domMeg = document.createElement('div');
+      domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
+      // msgArea.appendChild(domMeg);
+
+      e = document.querySelector('#msg')
+      e.insertBefore(domMeg, e.firstChild)
+    }
+
+  </script>
+</body>
+</html>
