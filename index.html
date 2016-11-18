@@ -21,6 +21,18 @@ img.led {
     <input type="button" value="off" onClick="led_off()" class="button"/>
   </p>
   <p id="festum">あなたはそこにいますか？</p>
+  <div>
+    明るさ：<span id="light">0</span>ルクス
+  </div>
+  <div>
+    気温：<span id="temperature">0</span>℃
+  </div>
+  <div>
+    湿度：<span id="humidity">0</span>%
+  </div>
+  <div>
+    touch：<span id="touch">No</span>
+  </div>
   <div id="msg"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
@@ -51,6 +63,23 @@ img.led {
       if (data.value == 'off') {
         festum.innerHTML = "あなたはそこにいますか？";
       }
+    });
+
+    var lx = document.getElementById("light");
+    socketio.on('light', function(data) {
+      lx.innerText = data.lx;
+    });
+
+    var temperature = document.getElementById("temperature");
+    var humidity = document.getElementById("humidity");
+    socketio.on('dht', function(data) {
+      temperature.innerText = data.temperature;
+      humidity.innerText = data.humidity;
+    });
+
+    var touch = document.getElementById("touch");
+    socketio.on('touch', function(data) {
+      touch.innerText = data.value;
     });
 
     socketio.on('connect', function() {
